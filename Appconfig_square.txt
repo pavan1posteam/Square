@@ -1,0 +1,2 @@
+<!--mapping for store 11348-->
+<add key="diff_map" value="11348"/>
