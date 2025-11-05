@@ -22,7 +22,10 @@ namespace Square
         string differentmap = ConfigurationManager.AppSettings["different_map"];
         string differentmapping = ConfigurationManager.AppSettings["different_mapping"];
         string diffmap = ConfigurationManager.AppSettings["diff_map"];
+        string AllUpcs = ConfigurationManager.AppSettings["AllUpcs"];
+        string CategoriesEnabled = ConfigurationManager.AppSettings["CategoriesEnabled"];
         public string strcategory = "";
+        string StaticQTY = ConfigurationManager.AppSettings["StaticQTY"];
         public clsSquarePos(int StoreId, string accessToken, string DeveloperId, string categories, decimal tax, string LocationId)
         {
             Console.WriteLine("Generating SquarePOS " + StoreId + " Product File.......");
@@ -62,11 +65,12 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
+                //File.AppendAllText("11348(category).json", content);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("" + ex.Message);
-                //(new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
+                (new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
             }
             finally { }
             return content;
@@ -84,11 +88,12 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
+                //File.AppendAllText("11348(product).json", content);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("" + ex.Message);
-                // (new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
+                (new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
             }
             finally { }
             return content;
@@ -109,6 +114,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
+                //File.AppendAllText("11348(count).json", content);
             }
             catch (Exception ex)
             {
@@ -144,7 +150,7 @@ namespace Square
             catch (Exception ex)
             {
                 Console.WriteLine("" + ex.Message);
-                // (new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
+                (new clsEmail()).sendEmail(DeveloperId, "", "", "Error in ExtractPOS@" + DateTime.UtcNow + " GMT", ex.Message + "<br/>" + ex.StackTrace);
             }
             finally { }
             return obj;
@@ -360,9 +366,11 @@ namespace Square
                 List<ProductCategory> lcategory = ListCategory(baseUrl, "/v2/catalog/list?types=category", accessToken);
                 List<Tax> ltax = ListTax(baseUrl, "/v2/catalog/list?types=tax", accessToken);
                 List<Product> litems = ProductItem(baseUrl, "/v2/catalog/list?types=item", accessToken);
+                if (string.IsNullOrEmpty(LocationId))//changed for testing in github
+                    LocationId = llocations[0].id;
                 List<Count> listInv = InvCount(baseUrl, accessToken, LocationId);
-                List<Inventory> linventory = null;// Inventory(baseUrl, accessToken, LocationId);
-                List<v1Items> lv1items = null;//ListV1Items(baseUrl, accessToken, LocationId);
+                //List<Inventory> linventory = null;// Inventory(baseUrl, accessToken, LocationId);
+                //List<v1Items> lv1items = null;//ListV1Items(baseUrl, accessToken, LocationId);
                 List<SquareProductModel> listproduct = new List<SquareProductModel>();
                 List<QuantityList> qtylist = new List<QuantityList>();
                 List<SquareCSvProductModelDemo> listDemo = new List<SquareCSvProductModelDemo>();
@@ -395,6 +403,11 @@ namespace Square
                                     prdlist.description = item.item_data.variations[i].item_variation_data.name;
                                 }
                                 prdlist.category_id = item.item_data.category_id;
+
+                                if (item.item_data.Categories != null && item.item_data.Categories.Count > i && item.item_data.Categories[i] != null && !string.IsNullOrEmpty(item.item_data.Categories[i].Id))
+                                {
+                                    prdlist.categories_id = item.item_data.Categories[i].Id;
+                                }
                                 prdlist.amount = item.item_data.variations[i].item_variation_data.price_money == null ? 0 : item.item_data.variations[i].item_variation_data.price_money.amount;
                                 if (prdlist.amount > 0)
                                 {
@@ -406,7 +419,7 @@ namespace Square
                     }
                     catch (Exception ex)
                     {
-
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 if (differentmap.Contains(StoreId.ToString()))
@@ -427,7 +440,7 @@ namespace Square
                                       upc = p.sku == null ? "" : p.sku,
                                       sku = p.sku == null ? "" : p.sku,
                                       Tax = tax,
-                                      Price = p.amount == null ? 0 : p.amount,
+                                      Price = p.amount < 0 ? 0 : p.amount,
                                       state = l.state,
                                       qty = l.quantity == null ? 0 : l.quantity == "" ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)) < 0 ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)),
                                       categoryid = p.category_id == null ? "" : p.category_id,
@@ -458,7 +471,7 @@ namespace Square
                                                 StoreProductName = c.StoreProductName,
                                                 StoreDescription = c.StoreProductName,
                                                 sku = "#" + c.sku,
-                                                qty = c.qty,
+                                                qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
                                                 pack = c.pack,
                                                 Price = (decimal)c.Price / 100,
                                                 sprice = c.sprice,
@@ -475,7 +488,7 @@ namespace Square
                     }
                     catch (Exception ex)
                     {
-
+                        Console.WriteLine(ex.Message);
                     }
                 }
                 else if (differentmapping.Contains(StoreId.ToString()))       //11361
@@ -532,7 +545,7 @@ namespace Square
                                                StoreProductName = c.StoreProductName,
                                                StoreDescription = c.StoreProductName,
                                                sku = "#" + c.sku,
-                                               qty = c.qty,
+                                               qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
                                                pack = c.pack,
                                                Price = (decimal)c.Price / 100,
                                                sprice = (decimal)c.sprice,
@@ -552,7 +565,7 @@ namespace Square
                     }
                     catch (Exception ex)
                     {
-
+                        Console.WriteLine(ex.Message);
                     }
 
                 }
@@ -566,12 +579,15 @@ namespace Square
                                   from tf in rt.DefaultIfEmpty()
                                   join l in listInv on p.varitionId equals l.catalog_object_id
                                   where l.state == "IN_STOCK"
+
+                                  where !string.IsNullOrEmpty(p.upc) || !string.IsNullOrEmpty(p.sku)  // allows only when both upc and sku are not null or empty
+
                                   select new SquareCSvProductModelDemo
                                   {
                                       storeid = StoreId,
                                       StoreProductName = p.prodname == null ? "" : p.prodname,
                                       StoreDescription = p.prodname == null ? "" : p.prodname,
-                                      upc = p.upc == null ? "" : p.upc,
+                                      upc = string.IsNullOrEmpty(p.upc) ? p.sku : p.upc, // Replace null/empty UPC with SKU
                                       sku = p.sku == null ? "" : p.sku,
                                       Tax = tax,
                                       Price = p.amount,
@@ -601,7 +617,7 @@ namespace Square
 
                         var productfile = (from c in listDemo
                                            where (c.upc ?? "").All(char.IsDigit)
-                                           where (c.qty > 0)//irrespective of qty for store 11348
+                                          // where (c.qty > 0)//irrespective of qty for store 11348
                                            select new SquareCSvProductModel
                                            {
                                                storeid = c.storeid,
@@ -609,7 +625,7 @@ namespace Square
                                                StoreProductName = c.StoreProductName,
                                                StoreDescription = c.StoreProductName,
                                                sku = "#" + c.sku,
-                                               qty = c.qty,
+                                               qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
                                                pack = c.pack,
                                                Price = (decimal)c.Price / 100,
                                                sprice = (decimal)c.sprice,
@@ -631,11 +647,12 @@ namespace Square
                     }
                     catch (Exception ex)
                     {
-
+                        Console.WriteLine(ex.Message);
                     }
 
                 }
-                else
+
+                else if (CategoriesEnabled.Contains(StoreId.ToString()))
                 {
                     try
                     {
@@ -663,7 +680,8 @@ namespace Square
                                       altupc2 = "",
                                       altupc3 = "",
                                       altupc4 = "",
-                                      altupc5 = ""
+                                      altupc5 = "",
+                                      pcat = p.categories_id
                                   }).Distinct().ToList();
                         listDemo.AddRange(tt);
 
@@ -687,7 +705,7 @@ namespace Square
                                                StoreProductName = c.StoreProductName,
                                                StoreDescription = c.StoreProductName,
                                                sku = "#" + c.sku,
-                                               qty = c.qty,
+                                               qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
                                                pack = c.pack,
                                                Price = (decimal)c.Price / 100,
                                                sprice = (decimal)c.sprice,
@@ -704,10 +722,190 @@ namespace Square
 
 
                         GenerateCSV.GenerateCSVFile(productfile, "PRODUCT", StoreId, folderPath);
+
+
+
+                        var fullnamequery = (from p in listDemo
+                                             join c in lcategory on p.pcat equals c.id into pc
+                                             from c in pc.DefaultIfEmpty()
+                                             where (p.upc ?? "").All(char.IsDigit)
+                                             select new FullNameProductModel
+                                             {
+                                                 upc = "#" + p.upc,
+                                                 sku = "#" + p.sku,
+                                                 pname = p.StoreProductName,
+                                                 pdesc = p.StoreProductName,
+                                                 pcat = c == null ? null : c.category_data.name.ToString(),
+                                                 pack = 1,
+                                                 pcat1 = "",
+                                                 pcat2 = "",
+                                                 Price = (decimal)p.Price / 100,
+                                                 uom = "",
+                                                 country = "",
+                                                 region = "",
+
+                                             }).ToList();
+
+
+
+                        GenerateCSV.GenerateCSVFile(fullnamequery, "FULLNAME", StoreId, folderPath);
                     }
                     catch (Exception ex)
                     {
+                        Console.WriteLine(ex.Message);
+                    }
 
+                }
+                else if (AllUpcs.Contains(StoreId.ToString()))
+                {
+                    try
+                    {
+                        SquareCSvProductModelDemo demo = new SquareCSvProductModelDemo();
+                        var tt = (from p in prdlists
+                                  join r in listInv on p.varitionId equals r.catalog_object_id into rt
+                                  from tf in rt.DefaultIfEmpty()
+                                  join l in listInv on p.varitionId equals l.catalog_object_id
+                                  where l.state == "IN_STOCK"  //08/02/2022 #10123
+                                  select new SquareCSvProductModelDemo
+                                  {
+                                      storeid = StoreId,
+                                      StoreProductName = p.prodname == null ? "" : p.prodname,
+                                      StoreDescription = p.prodname == null ? "" : p.prodname,
+                                      upc = p.upc == null ? "" : p.upc,
+                                      sku = p.sku == null ? "" : p.sku,
+                                      Tax = tax,
+                                      Price = p.amount,
+                                      state = l.state,
+                                      qty = l.quantity == null ? 0 : l.quantity == "" ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)) < 0 ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)),
+                                      categoryid = p.category_id == null ? "" : p.category_id,
+                                      pack = 1,
+                                      sprice = 0,
+                                      altupc1 = "",
+                                      altupc2 = "",
+                                      altupc3 = "",
+                                      altupc4 = "",
+                                      altupc5 = ""
+                                  }).Distinct().ToList();
+                        listDemo.AddRange(tt);
+
+                        listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
+
+                        if (!string.IsNullOrEmpty(strcategory))
+                        {
+                            List<storecat> clscat = JsonConvert.DeserializeObject<List<storecat>>(strcategory);
+                            if (clscat != null)
+                            {
+                                var tquery = litems.Where(x => clscat.Any(y => y.catid == x.item_data.category_id));
+                            }
+                        }
+
+                        var productfile = (from c in listDemo
+                                           where !string.IsNullOrEmpty(c.upc)
+                                           select new SquareCSvProductModel
+                                           {
+                                               storeid = c.storeid,
+                                               upc = "#" + c.upc,
+                                               StoreProductName = c.StoreProductName,
+                                               StoreDescription = c.StoreProductName,
+                                               sku = "#" + c.sku,
+                                               qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
+                                               pack = c.pack,
+                                               Price = (decimal)c.Price / 100,
+                                               sprice = (decimal)c.sprice,
+                                               Tax = c.Tax,
+                                               Start = "",
+                                               End = "",
+                                               altupc1 = "",
+                                               altupc2 = "",
+                                               altupc3 = "",
+                                               altupc4 = "",
+                                               altupc5 = "",
+
+                                           }).ToList();
+
+
+                        GenerateCSV.GenerateCSVFile(productfile, "PRODUCT", StoreId, folderPath);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        SquareCSvProductModelDemo demo = new SquareCSvProductModelDemo();
+                        var tt = (from p in prdlists
+                                  join r in listInv on p.varitionId equals r.catalog_object_id into rt
+                                  from tf in rt.DefaultIfEmpty()
+                                  join l in listInv on p.varitionId equals l.catalog_object_id
+                                  where l.state == "IN_STOCK"  //08/02/2022 #10123
+                                  select new SquareCSvProductModelDemo
+                                  {
+                                      storeid = StoreId,
+                                      StoreProductName = p.prodname == null ? "" : p.prodname,
+                                      StoreDescription = p.prodname == null ? "" : p.prodname,
+                                      upc = p.upc == null ? "" : p.sku,
+                                      sku = p.sku == null ? "" : p.sku,
+                                      Tax = tax,
+                                      Price = p.amount,
+                                      state = l.state,
+                                      qty = l.quantity == null ? 0 : l.quantity == "" ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)) < 0 ? 0 : Convert.ToInt32(Convert.ToDouble(l.quantity)),
+                                      categoryid = p.category_id == null ? "" : p.category_id,
+                                      pack = 1,
+                                      sprice = 0,
+                                      altupc1 = "",
+                                      altupc2 = "",
+                                      altupc3 = "",
+                                      altupc4 = "",
+                                      altupc5 = ""
+                                  }).Distinct().ToList();
+                        listDemo.AddRange(tt);
+                        
+                        listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
+
+                        if (!string.IsNullOrEmpty(strcategory))
+                        {
+                            List<storecat> clscat = JsonConvert.DeserializeObject<List<storecat>>(strcategory);
+                            if (clscat != null)
+                            {
+                                var tquery = litems.Where(x => clscat.Any(y => y.catid == x.item_data.category_id));
+                            }
+                        }
+
+                        var productfile = (from c in listDemo
+                                           where (c.upc ?? "").All(char.IsDigit)
+                                           select new SquareCSvProductModel
+                                           {
+                                               storeid = c.storeid,
+                                               upc = "#" + c.upc,
+                                               StoreProductName = c.StoreProductName,
+                                               StoreDescription = c.StoreProductName,
+                                               sku = "#" + c.sku,
+                                               qty = StaticQTY.Contains(StoreId.ToString()) ? 999 : c.qty,
+                                               pack = c.pack,
+                                               Price = (decimal)c.Price / 100,
+                                               sprice = (decimal)c.sprice,
+                                               Tax = c.Tax,
+                                               Start = "",
+                                               End = "",
+                                               altupc1 = "",
+                                               altupc2 = "",
+                                               altupc3 = "",
+                                               altupc4 = "",
+                                               altupc5 = "",
+
+                                           }).ToList();
+
+
+                        GenerateCSV.GenerateCSVFile(productfile, "PRODUCT", StoreId, folderPath);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
                     }
 
                 }

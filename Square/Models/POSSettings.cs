@@ -18,6 +18,10 @@ namespace Square.Models
             DataSet dsResult = new DataSet();
             List<POSSetting> posdetails = new List<POSSetting>();
             //List<StoreSetting> StoreList = new List<StoreSetting>();
+            List<SqlParameter> sparams = new List<SqlParameter>();
+            sparams.Add(new SqlParameter("@PosId", 4));
+
+            
             try
             {
                 string constr = ConfigurationManager.AppSettings.Get("LiquorAppsConnectionString");
@@ -27,6 +31,7 @@ namespace Square.Models
                     {
                         cmd.Connection = con;
                         cmd.CommandText = "usp_ts_GetStorePosSetting";
+                        cmd.Parameters.Add(sparams[0]);
                         cmd.CommandType = CommandType.StoredProcedure;
                         using (SqlDataAdapter da = new SqlDataAdapter())
                         {

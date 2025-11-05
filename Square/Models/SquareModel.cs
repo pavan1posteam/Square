@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,6 +114,18 @@ namespace Square.Models
         public List<Variation> variations { get; set; }
         public string product_type { get; set; }
         public bool skip_modifier_screen { get; set; }
+
+        [JsonProperty("categories")]
+        public List<Category> Categories { get; set; }
+    }
+
+    public class Category
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("ordinal")]
+        public long Ordinal { get; set; }
     }
     public class Variation
     {
@@ -330,6 +343,9 @@ namespace Square.Models
         public string ItemVariationID { get; set; }
         public string InvVariationId { get; set; }
         public string state { get; set; }
+
+        public string pcat { get; set; }
+
     }
     public class ProductList
     {
@@ -338,6 +354,9 @@ namespace Square.Models
         public string sku { get; set; }
         public string upc { get; set; }
         public string category_id { get; set; }
+
+        public string categories_id { get; set; }
+
         public string size { get; set; }
         public decimal amount { get; set; }
         public string description { get; set; }
