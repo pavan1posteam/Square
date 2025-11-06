@@ -366,7 +366,7 @@ namespace Square
                 List<ProductCategory> lcategory = ListCategory(baseUrl, "/v2/catalog/list?types=category", accessToken);
                 List<Tax> ltax = ListTax(baseUrl, "/v2/catalog/list?types=tax", accessToken);
                 List<Product> litems = ProductItem(baseUrl, "/v2/catalog/list?types=item", accessToken);
-                if (string.IsNullOrEmpty(LocationId))//changed for testing in github
+                if (string.IsNullOrEmpty(LocationId))
                     LocationId = llocations[0].id;
                 List<Count> listInv = InvCount(baseUrl, accessToken, LocationId);
                 //List<Inventory> linventory = null;// Inventory(baseUrl, accessToken, LocationId);
