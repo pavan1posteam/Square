@@ -17,7 +17,7 @@ namespace Square
                 {
                     try
                     {
-                        if (current.PosName.ToUpper() == "SQUAREPOS")
+                        if (current.PosName.ToUpper() == "SQUAREPOS"    )
                         {
                             
                                 clsSquarePos clsSquarePos = new clsSquarePos(current.StoreSettings.StoreId, current.StoreSettings.POSSettings.APIKey, DeveloperId, current.StoreSettings.POSSettings.category, current.StoreSettings.POSSettings.tax, current.StoreSettings.POSSettings.LocationId);

@@ -65,7 +65,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-                //File.AppendAllText("11348(category).json", content);
+             //   File.AppendAllText("12664(category).json", content);  // comment later
             }
             catch (Exception ex)
             {
@@ -88,7 +88,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-                //File.AppendAllText("11348(product).json", content);
+              //  File.AppendAllText("12664(product).json", content);  // comment later
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-                //File.AppendAllText("11348(count).json", content);
+               // File.AppendAllText("12664(count).json", content);   // comment later 
             }
             catch (Exception ex)
             {
@@ -377,7 +377,7 @@ namespace Square
 
                 List<ProductList> prdlists = new List<ProductList>();
                 foreach (var item in litems)
-                {
+                  {
                     try
                     {
                         if (item.item_data.variations != null)
@@ -411,9 +411,11 @@ namespace Square
                                 prdlist.amount = item.item_data.variations[i].item_variation_data.price_money == null ? 0 : item.item_data.variations[i].item_variation_data.price_money.amount;
                                 if (prdlist.amount > 0)
                                 {
-                                    prdlists.Add(prdlist);
-                                }
 
+                                    prdlists.Add(prdlist);    
+
+                                }
+                                 
                             }
                         }
                     }
@@ -685,7 +687,10 @@ namespace Square
                                   }).Distinct().ToList();
                         listDemo.AddRange(tt);
 
-                        listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
+                        if (StoreId!=12664)  //  #45505 
+                        {
+                            listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
+                        }
 
                         if (!string.IsNullOrEmpty(strcategory))
                         {
@@ -864,7 +869,7 @@ namespace Square
                                   }).Distinct().ToList();
                         listDemo.AddRange(tt);
                         
-                        listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
+                       listDemo = listDemo.GroupBy(x => x.upc).Select(y => y.FirstOrDefault()).ToList();
 
                         if (!string.IsNullOrEmpty(strcategory))
                         {
