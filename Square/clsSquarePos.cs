@@ -65,7 +65,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-             //   File.AppendAllText("12664(category).json", content);  // comment later
+            //   File.AppendAllText("12664(category).json", content);  // comment later
             }
             catch (Exception ex)
             {
@@ -88,7 +88,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-              //  File.AppendAllText("12664(product).json", content);  // comment later
+             //  File.AppendAllText("12664(product).json", content);  // comment later
             }
             catch (Exception ex)
             {
@@ -114,7 +114,7 @@ namespace Square
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 IRestResponse response = client.Execute(request);
                 content = response.Content;
-               // File.AppendAllText("12664(count).json", content);   // comment later 
+             // File.AppendAllText("12664(count).json", content);   // comment later 
             }
             catch (Exception ex)
             {

@@ -136,7 +136,7 @@ namespace Square.Models
     }
     public class storecat
     {
-        public string catid { get; set; }
+        public string catid { get; set; } 
         public string catname { get; set; }
     }
 }

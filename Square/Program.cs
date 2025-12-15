@@ -17,9 +17,9 @@ namespace Square
                 {
                     try
                     {
-                        /*if (current.StoreSettings.StoreId  ==   12813)
+                        /*if (current.StoreSettings.StoreId == 12664)
                         {
-
+                            Console.WriteLine("Fetching_storeid " + current.StoreSettings.StoreId);
                         }
                         else { continue; }*/
 
