@@ -17,11 +17,16 @@ namespace Square
                 {
                     try
                     {
-                        /*if (current.StoreSettings.StoreId == 12664)
-                        {
-                            Console.WriteLine("Fetching_storeid " + current.StoreSettings.StoreId);
-                        }
-                        else { continue; }*/
+                        /* uncomment above string constr  before sending live in POSSettings.cs
+                         * comment string constr = dbConnection;   because in live db keys will fetch from Appconfig only 
+                         * comment below store condition also before sending live  
+                         */
+
+                        //if (current.StoreSettings.StoreId == 12926)
+                        //{
+                        //    Console.WriteLine("Fetching_storeid " + current.StoreSettings.StoreId);
+                        //}
+                        //else { continue; }
 
                         if (current.PosName.ToUpper() == "SQUAREPOS"  )
                         {

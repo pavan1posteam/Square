@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +27,20 @@ namespace Square.Models
             try
             {
                 string constr = ConfigurationManager.AppSettings.Get("LiquorAppsConnectionString");
+
+                string fileP2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dbsettings.json");
+                DbSettings dbcon = JsonConvert.DeserializeObject<DbSettings>(File.ReadAllText(fileP2));
+                string dbConnection = dbcon.liquorappsconnectionstring[0];  // [0] is for local DB & [1] is for Live DB
+
+                //  string liveDBCon = dbcon.liquorappsconnectionstring[1];  //Donot use this (this is for testing ) , use only above line by changing [0] or [1]
+
+                /*  uncomment above string constr  before sending live 
+                 *  comment string constr = dbConnection;   because in live db keys will fetch from Appconfig only 
+                 */
+
+                //  string constr = dbConnection;
+
+
                 using (SqlConnection con = new SqlConnection(constr))
                 {
                     using (SqlCommand cmd = new SqlCommand())
@@ -138,5 +154,11 @@ namespace Square.Models
     {
         public string catid { get; set; } 
         public string catname { get; set; }
+    }
+
+    public class DbSettings
+    {
+        public List<string> liquorappsconnectionstring { get; set; }
+
     }
 }
