@@ -390,6 +390,10 @@ namespace Square
 
                                 prdlist.varitionId = item.item_data.variations[i].id;//72R6EMATHICMMXHFPMEHATPW
                                 prdlist.upc = item.item_data.variations[i].item_variation_data.upc;
+                                if (String.IsNullOrEmpty(prdlist.upc))
+                                {
+                                    continue;
+                                }
                                 prdlist.sku = item.item_data.variations[i].item_variation_data.sku;
                                 prdlist.size = item.item_data.variations[i].item_variation_data.name;
                                 prdlist.prodname = item.item_data.name;
@@ -411,7 +415,6 @@ namespace Square
                                 prdlist.amount = item.item_data.variations[i].item_variation_data.price_money == null ? 0 : item.item_data.variations[i].item_variation_data.price_money.amount;
                                 if (prdlist.amount > 0)
                                 {
-
                                     prdlists.Add(prdlist);    
 
                                 }
@@ -852,8 +855,14 @@ namespace Square
                                       storeid = StoreId,
                                       StoreProductName = p.prodname == null ? "" : p.prodname,
                                       StoreDescription = p.prodname == null ? "" : p.prodname,
-                                      upc = p.upc == null ? "" : p.sku,
-                                      sku = p.sku == null ? "" : p.sku,
+                                      //   upc = p.upc == null ? "" : p.sku, //  donot know why upc made null & sku is used for upc 
+                                      //  sku = p.sku == null ? "" : p.sku, 
+                                   
+                                      // added on 6-16-26 for alternative to above upc and sku one                                                                           
+                                      upc = p.upc ,   // UPC should always be UPC
+
+                                      // SKU should be SKU, if null fallback to UPC
+                                      sku = string.IsNullOrEmpty(p.sku) ? p.upc : p.sku,
                                       Tax = tax,
                                       Price = p.amount,
                                       state = l.state,
@@ -882,6 +891,7 @@ namespace Square
 
                         var productfile = (from c in listDemo
                                            where (c.upc ?? "").All(char.IsDigit)
+                                            && c.upc.Length > 2
                                            select new SquareCSvProductModel
                                            {
                                                storeid = c.storeid,

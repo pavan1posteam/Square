@@ -26,19 +26,19 @@ namespace Square.Models
             
             try
             {
-                string constr = ConfigurationManager.AppSettings.Get("LiquorAppsConnectionString");
+                 string constr = ConfigurationManager.AppSettings.Get("LiquorAppsConnectionString");
 
                 string fileP2 = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dbsettings.json");
                 DbSettings dbcon = JsonConvert.DeserializeObject<DbSettings>(File.ReadAllText(fileP2));
                 string dbConnection = dbcon.liquorappsconnectionstring[0];  // [0] is for local DB & [1] is for Live DB
 
-                //  string liveDBCon = dbcon.liquorappsconnectionstring[1];  //Donot use this (this is for testing ) , use only above line by changing [0] or [1]
+                //Donot use this (this is for testing ) , use only above line by changing [0] or [1]
 
                 /*  uncomment above string constr  before sending live 
                  *  comment string constr = dbConnection;   because in live db keys will fetch from Appconfig only 
                  */
 
-                //  string constr = dbConnection;
+               //  string constr = dbConnection;
 
 
                 using (SqlConnection con = new SqlConnection(constr))
